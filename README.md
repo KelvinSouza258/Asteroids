@@ -6,7 +6,7 @@ A, D - Rotaciona
 
 Espaço - Atira
 
-### Todo
+### TODO
 - [ ] Menu
 - [ ] Game Over
 - [ ] Pontuação
