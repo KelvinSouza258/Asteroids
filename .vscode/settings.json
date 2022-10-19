@@ -1,4 +1,10 @@
 {
+    "editor.formatOnSave": true,
     "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "python.linting.flake8Args": ["--per-file-ignores=__init__.py:F401"],
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python"
+    },
+    "python.formatting.provider": "black"
 }
