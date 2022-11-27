@@ -1,20 +1,18 @@
 import pyglet
 import pymunk
-
 from .entity import Entity
-from globals import bullet_category, asteroid_category
+from globals import star_category, player_category
 
 
-class Bullet(Entity):
+class Star(Entity):
     def __init__(
         self,
         x: int,
         y: int,
-        lives: int,
-        angle: float = 0,
         batch: pyglet.graphics.Batch = None,
-    ) -> None:
-        image = pyglet.image.load(f"assets/laser{lives}.png")
+        width: int = 36,
+    ):
+        image = pyglet.image.load("assets/star.png")
         image.anchor_x = image.width // 2
         image.anchor_y = image.height // 2
 
@@ -23,13 +21,10 @@ class Bullet(Entity):
             x,
             y,
             batch=batch,
-            width=8,
+            width=width,
         )
 
-        self.shape.id = "bullet"
-        self.body.angle = angle
+        self.shape.id = "star"
         self.shape.filter = pymunk.ShapeFilter(
-            categories=bullet_category, mask=asteroid_category
+            categories=star_category, mask=player_category
         )
-
-        self.apply_impulse(pymunk.Vec2d(0, 900), self.body.angle)

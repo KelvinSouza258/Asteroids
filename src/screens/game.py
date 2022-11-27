@@ -3,7 +3,8 @@ import pyglet
 from globals import space
 from .screen import Screen
 from src.core import load_asteroids, Window, ScreenHandler
-from src.entities import Player, Asteroid, Bullet, Entity
+from src.entities import Player, Asteroid, Bullet, Entity, Star
+from random import randint
 
 
 class Game(Screen):
@@ -14,6 +15,18 @@ class Game(Screen):
         self.asteroids = load_asteroids(space=space, batch=self.batch)
         self.destroyed_shapes: list[Entity] = []
         self.hud_batch = pyglet.graphics.Batch()
+
+        x, y = self.get_random_position()
+        self.stars = [
+            Star(
+                x=x,
+                y=y,
+                batch=self.batch,
+            )
+        ]
+
+        for star in self.stars:
+            space.add(star.body, star.shape)
 
         # draw 3 lives
         self.lives = 3
@@ -29,6 +42,7 @@ class Game(Screen):
 
         self.player = Player(
             width=64,
+            lives=self.lives,
             window=window,
             batch=self.batch,
         )
@@ -58,13 +72,25 @@ class Game(Screen):
             ):
                 self.destroyed_shapes.append(second_shape)
                 self.lose_live()
-
-            if (
+            elif (
                 first_shape.id == "asteroid"
                 and second_shape == self.player.shape  # noqa: E501
             ):
                 self.destroyed_shapes.append(first_shape)
                 self.lose_live()
+            # star collision + 10 points
+            elif (
+                first_shape == self.player.shape
+                and second_shape.id == "star"  # noqa: E501
+            ):
+                self.score += 15
+                self.destroyed_shapes.append(second_shape)
+            elif (
+                first_shape.id == "star"
+                and second_shape == self.player.shape  # noqa: E501
+            ):
+                self.score += 15
+                self.destroyed_shapes.append(first_shape)
 
             elif first_shape.id == "bullet" and second_shape.id == "asteroid":
                 self.destroyed_shapes.extend([first_shape, second_shape])
@@ -78,6 +104,22 @@ class Game(Screen):
 
         handler = space.add_default_collision_handler()
         handler.begin = collision_begin
+
+    def get_random_position(self):
+        return (
+            randint(100, self.window.width - 100),
+            randint(100, self.window.height - 100),
+        )
+
+    def add_star(self):
+        x, y = self.get_random_position()
+        star = Star(
+            x=x,
+            y=y,
+            batch=self.batch,
+        )
+        self.stars.append(star)
+        space.add(star.body, star.shape)
 
     def lose_live(self):
         self.lives -= 1
@@ -93,7 +135,9 @@ class Game(Screen):
 
     def update(self, dt):
         self.label_score.text = f"Score: {self.score}"
-        game_objects = [self.player] + self.player.shots + self.asteroids
+        game_objects = (
+            [self.player] + self.stars + self.player.shots + self.asteroids
+        )  # noqa: E501
 
         for obj in game_objects:
             obj.update(dt)
@@ -121,6 +165,12 @@ class Game(Screen):
                     space.remove(obj.body, obj.shape)
                     del obj
 
+            elif isinstance(obj, Star):
+                if obj.shape in self.destroyed_shapes:
+                    self.stars.remove(obj)
+                    space.remove(obj.body, obj.shape)
+                    del obj
+
             if len(self.asteroids) < 15:
                 self.asteroids.extend(
                     load_asteroids(
@@ -131,7 +181,12 @@ class Game(Screen):
 
     def __del__(self):
         try:
-            for obj in [self.player] + self.player.shots + self.asteroids:
+            for obj in (
+                [self.player]
+                + self.stars
+                + self.player.shots
+                + self.asteroids  # noqa: E501
+            ):
                 space.remove(obj.body, obj.shape)
                 del obj
         except AttributeError:

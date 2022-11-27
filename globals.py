@@ -1,6 +1,7 @@
 import pymunk
-import pymunk.pyglet_util
 
 space = pymunk.Space()
-options = pymunk.pyglet_util.DrawOptions()
-bullet_category = 0b1000
+bullet_category = 0b00001
+star_category = 0b00010
+asteroid_category = 0b00100
+player_category = 0b01000

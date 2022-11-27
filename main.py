@@ -21,7 +21,6 @@ def on_draw():
     window.clear()
     screen_handler.draw()
     counter.draw()
-    # space.debug_draw(options)
 
 
 def update(dt):
@@ -36,7 +35,14 @@ def update(dt):
             )
 
 
+def check_star(dt):
+    if isinstance(screen_handler.current, Game):
+        if not len(screen_handler.current.stars):
+            screen_handler.current.add_star()
+
+
 if __name__ == "__main__":
     pyglet.clock.schedule_interval(update, 1 / 120.0)
+    pyglet.clock.schedule_interval(check_star, 10)
 
     pyglet.app.run()

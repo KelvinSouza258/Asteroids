@@ -2,7 +2,7 @@ import pyglet
 import pymunk
 
 from math import radians
-from globals import space, bullet_category
+from globals import space, player_category, asteroid_category, star_category
 
 from src.core import Window
 from .entity import Entity
@@ -13,14 +13,16 @@ class Player(Entity):
     def __init__(
         self,
         window: Window,
+        lives: int,
         batch: pyglet.graphics.Batch = None,
         width: int = 32,
     ):
-        image = pyglet.image.load("assets/playerShip3.png")
+        image = pyglet.image.load(f"assets/playerShip{lives}.png")
         image.anchor_x = image.width // 2
         image.anchor_y = image.height // 2
 
         self.window = window
+        self.lives = lives
 
         self.shots: list[Bullet] = []
 
@@ -33,7 +35,9 @@ class Player(Entity):
         )
 
         self.shape.id = "player"
-        self.shape.filter = pymunk.ShapeFilter(bullet_category)
+        self.shape.filter = pymunk.ShapeFilter(
+            categories=player_category, mask=asteroid_category | star_category
+        )
 
         engine_image = pyglet.image.load("assets/fire.png")
         engine_image.anchor_x = engine_image.width // 2
@@ -55,6 +59,8 @@ class Player(Entity):
         self.body.velocity = 0, 0
         self.body.angle = 0
         self.body.angular_velocity = 0
+        self.lives = lives
+
         try:
             self.image = pyglet.image.load(f"assets/playerShip{lives}.png")
             self.image.anchor_x = self.image.width // 2
@@ -77,14 +83,18 @@ class Player(Entity):
             self.body.position = self.x, min_y
 
     def attack(self):
-        bullet = Bullet(
-            self.x,
-            self.y,
-            angle=self.body.angle,
-            batch=self.batch,
-        )
-        self.shots.append(bullet)
-        space.add(bullet.body, bullet.shape)
+        try:
+            bullet = Bullet(
+                self.x,
+                self.y,
+                lives=self.lives,
+                angle=self.body.angle,
+                batch=self.batch,
+            )
+            self.shots.append(bullet)
+            space.add(bullet.body, bullet.shape)
+        except FileNotFoundError:
+            pass
 
     def die(*args):
         print("Morri")

@@ -2,7 +2,7 @@ from math import radians
 from random import randint
 import pyglet
 from .entity import Entity
-
+from globals import asteroid_category, player_category, bullet_category
 
 import pymunk
 
@@ -30,6 +30,10 @@ class Asteroid(Entity):
         )
 
         self.shape.id = "asteroid"
+        self.shape.filter = pymunk.ShapeFilter(
+            categories=asteroid_category,
+            mask=asteroid_category | player_category | bullet_category,  # noqa: E501
+        )
 
         if x < 640 and y < 360:
             self.body.angle = radians(randint(30, 60))
