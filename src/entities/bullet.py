@@ -6,8 +6,14 @@ from globals import bullet_category
 
 
 class Bullet(Entity):
-    def __init__(self, x, y, angle=0, batch=None):
-        image = pyglet.image.load("assets/laserBlue01.png")
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        angle: float = 0,
+        batch: pyglet.graphics.Batch = None,
+    ) -> None:
+        image = pyglet.image.load("assets/laser.png")
         image.anchor_x = image.width // 2
         image.anchor_y = image.height // 2
 
@@ -23,6 +29,4 @@ class Bullet(Entity):
         self.body.angle = angle
         self.shape.filter = pymunk.ShapeFilter(bullet_category)
 
-        force = pymunk.Vec2d(0, 900)
-        force.rotated(self.body.angle)
-        self.body.apply_impulse_at_local_point(force)
+        self.apply_impulse(pymunk.Vec2d(0, 900), self.body.angle)

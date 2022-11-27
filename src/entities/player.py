@@ -4,22 +4,30 @@ import pymunk
 from math import radians
 from globals import space, bullet_category
 
+from src.core import Window
 from .entity import Entity
 from .bullet import Bullet
 
 
 class Player(Entity):
-    def __init__(self, x, y, batch=None, width=32):
-        image = pyglet.image.load("assets/player.png")
+    def __init__(
+        self,
+        window: Window,
+        batch: pyglet.graphics.Batch = None,
+        width: int = 32,
+    ):
+        image = pyglet.image.load("assets/playerShip3.png")
         image.anchor_x = image.width // 2
         image.anchor_y = image.height // 2
 
-        self.shots = []
+        self.window = window
+
+        self.shots: list[Bullet] = []
 
         super().__init__(
             image,
-            x,
-            y,
+            x=self.window.width // 2,
+            y=self.window.height // 2,
             batch=batch,
             width=width,
         )
@@ -27,13 +35,13 @@ class Player(Entity):
         self.shape.id = "player"
         self.shape.filter = pymunk.ShapeFilter(bullet_category)
 
-        engine_image = pyglet.image.load("assets/fire01.png")
+        engine_image = pyglet.image.load("assets/fire.png")
         engine_image.anchor_x = engine_image.width // 2
         engine_image.anchor_y = int(engine_image.height * 1.65)
         self.engine_sprite = pyglet.sprite.Sprite(
             engine_image,
-            x=x,
-            y=y,
+            x=self.window.width // 2,
+            y=self.window.height // 2,
             batch=batch,
         )
 
@@ -41,6 +49,18 @@ class Player(Entity):
         self.engine_sprite.scale = 1.5
 
         self.accelerating = False
+
+    def reset(self, lives: int):
+        self.body.position = self.window.width // 2, self.window.height // 2
+        self.body.velocity = 0, 0
+        self.body.angle = 0
+        self.body.angular_velocity = 0
+        try:
+            self.image = pyglet.image.load(f"assets/playerShip{lives}.png")
+            self.image.anchor_x = self.image.width // 2
+            self.image.anchor_y = self.image.height // 2
+        except FileNotFoundError:
+            pass
 
     def check_bounds(self):
         min_x = -self.image.width / 2
@@ -65,6 +85,9 @@ class Player(Entity):
         )
         self.shots.append(bullet)
         space.add(bullet.body, bullet.shape)
+
+    def die(*args):
+        print("Morri")
 
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.A:
@@ -110,8 +133,7 @@ class Player(Entity):
 
         if self.accelerating:
             self.engine_sprite.visible = True
-            force = pymunk.Vec2d(0, 5)
-            force.rotated(self.body.angle)
-            self.body.apply_impulse_at_local_point(force)
+            self.apply_impulse(pymunk.Vec2d(0, 5), self.body.angle)
+
         else:
             self.engine_sprite.visible = False

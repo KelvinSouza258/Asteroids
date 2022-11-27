@@ -5,7 +5,14 @@ from math import degrees
 
 
 class Entity(pyglet.sprite.Sprite):
-    def __init__(self, image, x, y, width=32, batch=None):
+    def __init__(
+        self,
+        image: pyglet.image.AbstractImage,
+        x: int,
+        y: int,
+        width: int = 32,
+        batch: pyglet.graphics.Batch = None,
+    ) -> None:
         super().__init__(
             image,
             x=x,
@@ -14,22 +21,34 @@ class Entity(pyglet.sprite.Sprite):
         )
 
         self.scale = width / self.width
-        self.moment = pymunk.moment_for_box(1, (self.width, self.height))
-        self.body = pymunk.Body(1, self.moment)
-        self.body.position = x, y
-        self.shape = pymunk.Poly.create_box(
-            self.body,
+        self._moment = pymunk.moment_for_box(1, (self.width, self.height))
+        self._body = pymunk.Body(1, self._moment)
+        self._body.position = x, y
+        self._shape = pymunk.Poly.create_box(
+            self._body,
             (
                 self.width,
                 self.height,
             ),
         )
-        self.shape.elasticity = 0
-        self.shape.friction = 0
+        self._shape.elasticity = 0
+        self._shape.friction = 0
 
-    def update(self, dt):
-        self.rotation = -degrees(self.body.angle)
-        self.position = self.body.position
+    @property
+    def body(self) -> pymunk.Body:
+        return self._body
+
+    @property
+    def shape(self) -> pymunk.Poly:
+        return self._shape
+
+    def update(self, dt) -> None:
+        self.rotation = -degrees(self._body.angle)
+        self.position = self._body.position
+
+    def apply_impulse(self, force: pymunk.Vec2d, angle: float = 0) -> None:
+        force.rotated(angle)
+        self.body.apply_impulse_at_local_point(force)
 
     def __del__(self):
         super().delete()

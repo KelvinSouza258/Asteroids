@@ -8,8 +8,16 @@ import pymunk
 
 
 class Asteroid(Entity):
-    def __init__(self, x, y, batch=None, width=32):
-        image = pyglet.image.load("assets/asteroids/meteorGrey_big1.png")
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        batch: pyglet.graphics.Batch = None,
+        width: int = 32,
+    ) -> None:
+        image = pyglet.image.load(
+            f"assets/asteroids/meteorGrey_big{randint(1,4)}.png",
+        )
         image.anchor_x = image.width // 2
         image.anchor_y = image.height // 2
 
@@ -32,8 +40,9 @@ class Asteroid(Entity):
         elif x > 640 and y > 360:
             self.body.angle = radians(randint(210, 240))
 
-        force = pymunk.Vec2d(randint(5, 150), randint(5, 150))
-        force.rotated(self.body.angle)
-        self.body.apply_impulse_at_local_point(force)
+        self.apply_impulse(
+            pymunk.Vec2d(randint(5, 150), randint(5, 150)),
+            self.body.angle,
+        )
 
         self.body.angular_velocity = radians(randint(-180, 180))
