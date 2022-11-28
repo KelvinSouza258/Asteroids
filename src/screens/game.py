@@ -12,7 +12,7 @@ class Game(Screen):
         super().__init__()
         self.window = window
         self.screen_handler = screen_handler
-        self.asteroids = load_asteroids(space=space, batch=self.batch)
+        self.asteroids = load_asteroids(space=space, batch=self.batch, window=self.window)
         self.destroyed_shapes: list[Entity] = []
         self.hud_batch = pyglet.graphics.Batch()
 
