@@ -176,6 +176,7 @@ class Game(Screen):
                     load_asteroids(
                         space=space,
                         batch=self.batch,
+                        window=self.window
                     )
                 )
 
