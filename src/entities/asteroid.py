@@ -2,6 +2,7 @@ from math import radians
 from random import randint
 import pyglet
 from .entity import Entity
+from src.core import Window
 from globals import asteroid_category, player_category, bullet_category
 
 import pymunk
@@ -12,6 +13,7 @@ class Asteroid(Entity):
         self,
         x: int,
         y: int,
+        window: Window,
         batch: pyglet.graphics.Batch = None,
         width: int = 32,
     ) -> None:
@@ -35,13 +37,13 @@ class Asteroid(Entity):
             mask=asteroid_category | player_category | bullet_category,  # noqa: E501
         )
 
-        if x < 640 and y < 360:
+        if x < window.width // 2 and y < window.height // 2:
             self.body.angle = radians(randint(30, 60))
-        elif x > 640 and y < 360:
+        elif x > window.width // 2 and y < window.height // 2:
             self.body.angle = radians(randint(120, 150))
-        elif x < 640 and y > 360:
+        elif x < window.width // 2 and y > window.height // 2:
             self.body.angle = radians(randint(300, 330))
-        elif x > 640 and y > 360:
+        elif x > window.width // 2 and y > window.height // 2:
             self.body.angle = radians(randint(210, 240))
 
         self.apply_impulse(

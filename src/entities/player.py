@@ -71,8 +71,8 @@ class Player(Entity):
     def check_bounds(self):
         min_x = -self.image.width / 2
         min_y = -self.image.height / 2
-        max_x = 1280 + self.image.width / 2
-        max_y = 720 + self.image.height / 2
+        max_x = self.window.width + self.image.width / 2
+        max_y = self.window.height + self.image.height / 2
         if self.x < min_x:
             self.body.position = max_x, self.y
         elif self.x > max_x:
